@@ -57,4 +57,29 @@ posterior_summary(complex1)
 plot(complex1)
 mcmc_plot(complex1, type = "acf_bar")
 mcmc_plot(complex1, type = "areas")
+
+# Hurdle model
+# hurdle coefficient: log of prob of 0 count, relative to any positive count
+hist(m.complex$sharedsequence, breaks=seq(-1,10,1))
+
+complex_hd.prior <- c(prior(normal(0,1), class=Intercept),
+                   prior(normal(0,1), class=b),
+                   prior(exponential(1), class=sd),
+                   prior(normal(0,1), class=Intercept, dpar="hu"),
+                   prior(normal(0,1), class=b, dpar="hu"),
+                   prior(exponential(1), class=sd, dpar="hu"))
+complex.hd <- brm(sharedmod ~ scale(distance) + (1 | dyadID), 
+                hu ~ scale(distance) + (1 | dyadID),
+                family=hurdle_poisson(), data=m.complex,
+                prior=complex.prior,
+                cores=8, chains=4, 
+                control=list(adapt_delta =0.95))
+
+summary(complex.hd)
+posterior_summary(complex.hd)
+plot(complex.hd)
+mcmc_plot(complex.hd, type = "acf_bar")
+mcmc_plot(complex.hd, type = "areas")
+pp_check(complex.hd, ndraws=100)
+
               
