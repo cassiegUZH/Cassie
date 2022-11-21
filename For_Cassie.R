@@ -68,12 +68,14 @@ complex_hd.prior <- c(prior(normal(0,1), class=Intercept),
                    prior(normal(0,1), class=Intercept, dpar="hu"),
                    prior(normal(0,1), class=b, dpar="hu"),
                    prior(exponential(1), class=sd, dpar="hu"))
-complex.hd <- brm(sharedmod ~ scale(distance) + (1 | dyadID), 
-                hu ~ scale(distance) + (1 | dyadID),
-                family=hurdle_poisson(), data=m.complex,
-                prior=complex.prior,
-                cores=8, chains=4, 
-                control=list(adapt_delta =0.95))
+
+# that works
+complex.hd <- brm(bf(sharedsequence ~ scale(IBDmean) + (1|dyadID),
+                  hu ~ scale(IBDmean) + (1|dyadID)), 
+                  family= hurdle_poisson(), data=m.complex, 
+                  prior = com2,
+                  cores = 8, chains = 4,
+                  control=list(adapt_delta =0.95))
 
 summary(complex.hd)
 posterior_summary(complex.hd)
@@ -81,5 +83,7 @@ plot(complex.hd)
 mcmc_plot(complex.hd, type = "acf_bar")
 mcmc_plot(complex.hd, type = "areas")
 pp_check(complex.hd, ndraws=100)
+# this is useful in some cases, although not here
+plot(conditional_effects(complex.hd), points = T)
 
               
